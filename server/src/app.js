@@ -4,21 +4,24 @@ const port = 3000
 
 app.get('/exec', (req, res) => {
     // req.query.c
-    console.log(execCommand())
-    res.send("output:",execCommand())
+    // console.log(execCommand())
+    execCommand(req.query.c).then(r=>res.status(200).send(r)) 
 })
-function execCommand(callback) {
-    var exec = require('child_process').exec;
-    exec("git config --global user.name",
+function execCommand(req) {
+    return new Promise((resolve, reject) => {
+        var exec = require('child_process').exec;
+    exec(req,
         function (error, stdout, stderr) {
             if(stdout){
            console.log('stdout: ' + stdout);
-           return stdout;
+           resolve(stdout);
             }
-           if (stderr !== null) {
+           if (stderr) {
                console.log('exec error: ' + stderr);
-               return stderr;
+               resolve(stderr);
            }
         });
+    })
+    
 };
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
