@@ -2,6 +2,21 @@ const express = require('express')
 const app = express()
 const port = 3000
 
+var mongoose = require('mongoose');
+var db=require('./mongodb')
+db.connect();
+// db connection
+// var mongoose = require('mongoose');
+// module.exports.connect = function() {
+// 	mongoose.connect('mongodb://localhost:27017/vdeploy');
+// 	var db = mongoose.connection;
+// 	db.on("error", console.error.bind(console, "connection error"));
+// 	db.once("open", function(callback){
+// 	  console.log("Connection Succeeded");
+// 	});
+// 	return db;
+// }
+
 app.get('/exec', (req, res) => {
     // req.query.c
     // console.log(execCommand())
@@ -24,4 +39,4 @@ function execCommand(req) {
     })
     
 };
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`v-deploy listening on port ${port}!`))
