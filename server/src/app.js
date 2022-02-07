@@ -1,44 +1,48 @@
 const express = require('express')
 const app = express()
 const port = 3000
+const cors = require('cors');
+app.use(cors());
 
-// var mongoose = require('mongoose');
-var db = require('./mongodb')
-db.connect();
-var Snippets = require("../models/snippet");
-// Fetch all snippets
-app.get('/snippets', (req, res) => {
-    Snippets.find(
-        {Id:"1"},
-        'Id Name Author ExecutionCommand Description TagNames CreatedOn LastUsedOn CanBeLinkedToAProject HasDependency DependsOn Searchable RequirePasswordToExecute Status LastDeletedOn',
-        function (error, snippets) {
-            if (error) { console.error(error); }
-            res.send({
-                snippets: snippets
-            })
-        }).sort({ _id: -1 })
+// get snippets list
+app.get('/vdeploy/master/Snippet/List', (req, res) => {
+    var mongoose = require('mongoose');
+    mongoose.connect('mongodb://localhost:27017/vdeploy', function (err, db) {
+        if (err) throw err;
+
+        var coll = db.collection('Snippets');
+
+        coll.find({}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+
+                res.send(JSON.stringify(result));
+            }
+        })
+
+    });
 })
 
-app.get('/exec', (req, res) => {
-    // req.query.c
-    // console.log(execCommand())
-    execCommand(req.query.c).then(r => res.status(200).send(r))
+// execute command
+app.get('/api/vdeploy/home/ExecuteCommand', (req, res) => {
+    execCommand(req.query.command).then(r => res.status(200).send(r)).catch(e => res.status(500).send(e))
 })
+
 function execCommand(req) {
     return new Promise((resolve, reject) => {
         var exec = require('child_process').exec;
         exec(req,
             function (error, stdout, stderr) {
                 if (stdout) {
-                    console.log('stdout: ' + stdout);
                     resolve(stdout);
                 }
                 if (stderr) {
-                    console.log('exec error: ' + stderr);
-                    resolve(stderr);
+                    reject(stderr);
                 }
             });
     })
 
 };
+
 app.listen(port, () => console.log(`v-deploy listening on port ${port}!`))
